@@ -5,6 +5,7 @@ import {Context} from '../context';
 import {Bounds} from '../../css/layout/bounds';
 
 const proxy = 'http://example.com/proxy';
+Date.now = jest.fn(() => new Date(Date.UTC(2017, 0, 1)).valueOf());
 
 const createMockContext = (origin: string, opts = {}) => {
     const context = {
@@ -131,8 +132,8 @@ describe('cache-storage', () => {
         await cache.addImage('http://example.com/test2.jpg');
 
         deepStrictEqual(images.length, 2);
-        deepStrictEqual(images[0].src, 'http://example.com/test.jpg');
-        deepStrictEqual(images[1].src, 'http://example.com/test2.jpg');
+        deepStrictEqual(images[0].src, 'http://example.com/test.jpg?v=1483228800000');
+        deepStrictEqual(images[1].src, 'http://example.com/test2.jpg?v=1483228800000');
     });
 
     it('addImage should not add duplicate entries', async () => {
@@ -141,7 +142,7 @@ describe('cache-storage', () => {
         await cache.addImage('http://example.com/test.jpg');
 
         deepStrictEqual(images.length, 1);
-        deepStrictEqual(images[0].src, 'http://example.com/test.jpg');
+        deepStrictEqual(images[0].src, 'http://example.com/test.jpg?v=1483228800000');
     });
 
     describe('svg', () => {
@@ -151,8 +152,8 @@ describe('cache-storage', () => {
             await cache.addImage('http://example.com/test2.svg');
 
             deepStrictEqual(images.length, 2);
-            deepStrictEqual(images[0].src, 'http://example.com/test.svg');
-            deepStrictEqual(images[1].src, 'http://example.com/test2.svg');
+            deepStrictEqual(images[0].src, 'http://example.com/test.svg?v=1483228800000');
+            deepStrictEqual(images[1].src, 'http://example.com/test2.svg?v=1483228800000');
         });
 
         it('should omit svg images if not supported', async () => {
@@ -181,7 +182,7 @@ describe('cache-storage', () => {
             });
             await cache.addImage('http://html2canvas.hertzen.com/test.jpg');
             deepStrictEqual(images.length, 1);
-            deepStrictEqual(images[0].src, 'http://html2canvas.hertzen.com/test.jpg');
+            deepStrictEqual(images[0].src, 'http://html2canvas.hertzen.com/test.jpg?v=1483228800000');
             deepStrictEqual(images[0].crossOrigin, undefined);
         });
 
@@ -189,7 +190,7 @@ describe('cache-storage', () => {
             const {cache} = createMockContext('http://example.com', {useCORS: true});
             await cache.addImage('http://html2canvas.hertzen.com/test.jpg');
             deepStrictEqual(images.length, 1);
-            deepStrictEqual(images[0].src, 'http://html2canvas.hertzen.com/test.jpg');
+            deepStrictEqual(images[0].src, 'http://html2canvas.hertzen.com/test.jpg?v=1483228800000');
             deepStrictEqual(images[0].crossOrigin, 'anonymous');
         });
 
@@ -208,7 +209,7 @@ describe('cache-storage', () => {
             const {cache} = createMockContext('http://example.com', {useCORS: true});
             await cache.addImage('http://html2canvas.hertzen.com/test.jpg');
             deepStrictEqual(images.length, 1);
-            deepStrictEqual(images[0].src, 'http://html2canvas.hertzen.com/test.jpg');
+            deepStrictEqual(images[0].src, 'http://html2canvas.hertzen.com/test.jpg?v=1483228800000');
             deepStrictEqual(images[0].crossOrigin, 'anonymous');
         });
 
@@ -223,7 +224,7 @@ describe('cache-storage', () => {
             await xhr[0].load(200, '<data response>');
 
             deepStrictEqual(images.length, 1);
-            deepStrictEqual(images[0].src, '<data response>');
+            deepStrictEqual(images[0].src, '<data response>?v=1483228800000');
         });
 
         it('proxy should respect imageTimeout', async () => {
@@ -258,7 +259,7 @@ describe('cache-storage', () => {
 
         const response = await cache.match('http://example.com/test.jpg');
 
-        deepStrictEqual(response.src, 'http://example.com/test.jpg');
+        deepStrictEqual(response.src, 'http://example.com/test.jpg?v=1483228800000');
     });
 
     it('image should respect imageTimeout', async () => {
